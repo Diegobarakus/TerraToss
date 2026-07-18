@@ -1,0 +1,19 @@
+{
+    "name": "TerraToss.Presentation.Editor",
+    "rootNamespace": "TerraToss.Presentation.Editor",
+    "references": [
+        "TerraToss.Presentation",
+        "TerraToss.Geo"
+    ],
+    "includePlatforms": [
+        "Editor"
+    ],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": false,
+    "precompiledReferences": [],
+    "autoReferenced": true,
+    "defineConstraints": [],
+    "versionDefines": [],
+    "noEngineReferences": false
+}

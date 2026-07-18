@@ -26,9 +26,37 @@ Last initialized: 2026-07-18
     haversine great-circle distance, and spherical destination-point calculation.
   - `ImpactGrade` + `ImpactEvaluator`: distance-to-grade classification that
     rejects negative / non-finite distances.
-- Edit Mode tests in `TerraToss.Geo.EditMode.Tests`
-  (`Assets/_Game/Tests/EditMode/Geo/`): 64 tests, all passing.
-- No gameplay orchestration, presentation, UI, or scene wiring exists yet.
+- Pure shot-calculation layer, also in the `TerraToss.Geo` assembly:
+  - `ShotInput`: immutable shot definition (origin, heading, launch angle,
+    normalized power, maximum range, target).
+  - `ShotResult`: immutable result (impact coordinate, distance travelled,
+    distance to target, normalized heading, angle, power, impact grade).
+  - `ShotRangeCalculator`: fictional range model
+    `rangeKm = maximumRangeKm × power² × sin(2 × launchAngle)` (maximum range is a
+    parameter, never hardcoded).
+  - `GeoShotCalculator`: validates the input (power `[0, 1]`, angle `[0, 90]`,
+    maximum range `> 0`, finite heading), normalizes heading, and composes
+    `ShotRangeCalculator` + `GeoMath` + `ImpactEvaluator` into a `ShotResult`.
+- Static spatial/visual base in the `TerraToss.Presentation` assembly
+  (`Assets/_Game/Presentation/`, depends on `UnityEngine` and `TerraToss.Geo`):
+  - `GeoSphereProjection`: `GeoCoordinate` → local `Vector3` on a sphere of a
+    given radius. Axis convention: Y = polar axis (N = +Y, S = −Y), (lat 0, lon 0)
+    = +Z, East = +X, West = −X; magnitude equals the radius. Rejects radius ≤ 0
+    and non-finite radius. Does not duplicate `GeoMath`.
+  - `PrototypeSceneReferences`: `MonoBehaviour` holding explicit references
+    (Earth, origin marker, target marker, camera); no runtime scene search.
+    Holds the Earth radius constant (`EarthRadiusUnits = 5`).
+  - `PrototypeSceneBuilder` (Editor, `TerraToss.Presentation.Editor`): idempotent
+    `[MenuItem("TerraToss/Build Prototype Scene")]` that builds/updates the
+    prototype hierarchy into `Bootstrap.unity` (primitives, basic URP materials,
+    reuses the existing camera and directional light) and saves the scene.
+- Bootstrap.unity now contains the built prototype: `TerraToss_Prototype`
+  (Earth sphere; Markers → Origin_Mainz, Target_Helsinki; Environment →
+  Directional Light) plus the reused Main Camera and Global Volume.
+- Edit Mode tests: `TerraToss.Geo.EditMode.Tests` (106) and
+  `TerraToss.Presentation.EditMode.Tests` (14, projection + builder idempotency)
+  — 120 tests total, all passing.
+- No shot visualization, trajectory, animation, controls, or UI exists yet.
 
 ## Current phase
 
@@ -36,19 +64,20 @@ Phase 1: local functional prototype.
 
 ## Next recommended task
 
-The pure geographic foundation is complete. The next step is the shot
-calculation layer (still pure C#, no scene changes):
+The static spatial/visual base is complete. The next step is the shot
+visualization on top of it (extends the presentation layer and the builder):
 
-1. `ShotInput` (origin, heading, launch angle, normalized power).
-2. Fictional range model: `rangeKm = maximumRangeKm × power² × sin(2 × launchAngle)`
-   with explicit input validation.
-3. `ShotResult` (impact coordinate, distance to target, impact grade,
-   trajectory reconstruction data).
-4. `GeoShotCalculator` that composes `GeoMath` + `ImpactEvaluator`.
-5. Edit Mode tests, including the Mainz origin / Helsinki target scenario and
-   the zero / maximum power and angle boundaries.
+1. A projectile primitive placed at the origin marker.
+2. A trajectory reconstruction that samples the great-circle path from origin to
+   impact (reuse `GeoMath.DestinationPoint` bearings / interpolation) projected
+   through `GeoSphereProjection`, drawn with a `LineRenderer` or generated curve.
+3. A component that consumes a `ShotResult` and animates the projectile along the
+   trajectory, compressed to 6–10 seconds, without owning geographic rules.
+4. Basic Play Mode test(s) for the visual launch flow where practical.
 
-Do not modify scenes during this task.
+Still no desktop controls or UI yet (a later task). Continue reproducing scene
+changes through the idempotent Editor builder; never hand-edit `Bootstrap.unity`
+YAML.
 
 ## Known local issue
 

@@ -71,6 +71,31 @@ Requirements:
 - Consume calculated results.
 - Do not own authoritative geographic rules.
 
+Implemented so far (`TerraToss.Presentation` assembly, depends on `UnityEngine`
+and `TerraToss.Geo`):
+- `GeoSphereProjection` converts a `GeoCoordinate` to a local `Vector3` on a
+  sphere. It may depend on `UnityEngine`; the pure geographic engine stays plain
+  C# and is not duplicated.
+- `PrototypeSceneReferences` holds explicit scene references (no runtime search).
+- `PrototypeSceneBuilder` (Editor assembly `TerraToss.Presentation.Editor`)
+  builds the prototype hierarchy idempotently into `Bootstrap.unity`.
+
+#### Sphere axis convention
+
+Latitude/longitude map to a Unity local position (left-handed, Y up) as:
+
+```text
+x = R * cos(lat) * sin(lon)
+y = R * sin(lat)
+z = R * cos(lat) * cos(lon)
+```
+
+- Y is the polar axis: North pole = +Y, South pole = −Y.
+- (lat 0, lon 0) = (0, 0, +R) → +Z (Unity forward), the reference meridian on
+  the equator.
+- East (lon > 0) is toward +X (right); West (lon < 0) toward −X (left).
+- The magnitude of the result is exactly R.
+
 ### Platform services
 
 Future interfaces:
