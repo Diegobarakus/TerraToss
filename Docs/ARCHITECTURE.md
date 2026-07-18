@@ -76,9 +76,29 @@ and `TerraToss.Geo`):
 - `GeoSphereProjection` converts a `GeoCoordinate` to a local `Vector3` on a
   sphere. It may depend on `UnityEngine`; the pure geographic engine stays plain
   C# and is not duplicated.
+- `TrajectoryArcProjection` converts geographic trajectory samples to visual
+  `Vector3` points, adding a purely cosmetic arc height. See "Trajectory: visual
+  arc vs. authoritative path" below.
+- `ShotTrajectoryView` (`MonoBehaviour`) draws a trajectory through a
+  `LineRenderer` in local space; it owns no geographic rules.
 - `PrototypeSceneReferences` holds explicit scene references (no runtime search).
 - `PrototypeSceneBuilder` (Editor assembly `TerraToss.Presentation.Editor`)
-  builds the prototype hierarchy idempotently into `Bootstrap.unity`.
+  builds the prototype hierarchy idempotently into `Bootstrap.unity`, including a
+  deterministic demo shot and its trajectory.
+
+The geographic path itself is domain logic: `ShotTrajectorySampler` lives in the
+pure `TerraToss.Geo` assembly and produces `GeoCoordinate` samples along the
+great-circle path by reusing `GeoMath.DestinationPoint`.
+
+#### Trajectory: visual arc vs. authoritative path
+
+The authoritative shot result (impact coordinate, distance, `ImpactGrade`) is
+produced only by `GeoShotCalculator`, and the geographic path only by
+`ShotTrajectorySampler` — both pure C#. `TrajectoryArcProjection` then applies a
+cosmetic vertical offset `sin(π·progress)·maximumArcHeight` to the projected
+points. This arc is presentation-only: it is zero at the endpoints, never feeds
+back into any coordinate, distance, or grade, and does not represent real
+physics. Presentation performs no authoritative gameplay calculation.
 
 #### Sphere axis convention
 

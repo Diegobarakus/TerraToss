@@ -36,6 +36,19 @@ namespace TerraToss.Presentation.Tests.EditMode
                 Assert.AreEqual(1, CountChildren(markers, PrototypeSceneBuilder.TargetName));
 
                 Assert.IsNotNull(root.GetComponent<PrototypeSceneReferences>());
+
+                // Shot visualization must not be duplicated either.
+                Assert.AreEqual(1, CountChildren(root.transform, PrototypeSceneBuilder.ShotVisualizationName));
+                Transform shotVisualization = root.transform.Find(PrototypeSceneBuilder.ShotVisualizationName);
+                Assert.AreEqual(1, CountChildren(shotVisualization, PrototypeSceneBuilder.ProjectileName));
+                Assert.AreEqual(1, CountChildren(shotVisualization, PrototypeSceneBuilder.TrajectoryName));
+
+                Transform trajectory = shotVisualization.Find(PrototypeSceneBuilder.TrajectoryName);
+                Assert.AreEqual(1, trajectory.GetComponents<LineRenderer>().Length,
+                    "Trajectory must have exactly one LineRenderer.");
+                Assert.AreEqual(1, trajectory.GetComponents<ShotTrajectoryView>().Length,
+                    "Trajectory must have exactly one ShotTrajectoryView.");
+                Assert.That(trajectory.GetComponent<LineRenderer>().positionCount, Is.GreaterThan(1));
             }
             finally
             {

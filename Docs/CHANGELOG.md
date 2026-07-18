@@ -36,14 +36,25 @@
     existing camera and directional light, and saves the scene.
 - `Bootstrap.unity` prototype hierarchy: `TerraToss_Prototype` (Earth sphere;
   Markers → Origin_Mainz, Target_Helsinki; Environment → Directional Light).
-- Edit Mode test suite: `TerraToss.Geo.EditMode.Tests` (106) covering the
-  geographic and shot-calculation layers, and
-  `TerraToss.Presentation.EditMode.Tests` (14) covering the sphere projection and
-  the builder's idempotency. 120 tests total, all passing.
+- Static shot-trajectory visualization:
+  - `ShotTrajectorySampler` (pure C#, `TerraToss.Geo`): deterministic
+    great-circle samples from origin to impact, reusing `GeoMath.DestinationPoint`
+    (no linear lat/lon interpolation).
+  - `TrajectoryArcProjection` (`TerraToss.Presentation`): projects samples via
+    `GeoSphereProjection` and adds a cosmetic `sin(π·progress)·maxArcHeight`
+    offset (zero at ends, peak near the middle; points on or outside the radius).
+  - `ShotTrajectoryView` (`MonoBehaviour`): draws the trajectory with a
+    `LineRenderer` in local space; show/hide/clear; no gameplay rules.
+  - `PrototypeSceneBuilder` extended to build a `ShotVisualization` group
+    (Projectile sphere on the origin + Trajectory LineRenderer) idempotently from
+    a centralized deterministic demo shot (Mainz → Helsinki), and to keep a stable
+    sibling order. `Bootstrap.unity` updated accordingly.
+- Edit Mode test suite: `TerraToss.Geo.EditMode.Tests` (119) and
+  `TerraToss.Presentation.EditMode.Tests` (28) — 147 tests total, all passing.
 
 ### Not implemented
 
-- Shot visualization (projectile, trajectory, flight animation).
+- Projectile flight animation / movement along the trajectory.
 - Desktop input controls.
 - Gameplay orchestration and match rules.
 - Sensors.

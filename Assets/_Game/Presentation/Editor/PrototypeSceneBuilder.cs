@@ -23,10 +23,25 @@ namespace TerraToss.Presentation.Editor
         public const string TargetName = "Target_Helsinki";
         public const string EnvironmentName = "Environment";
         public const string DirectionalLightName = "Directional Light";
+        public const string ShotVisualizationName = "ShotVisualization";
+        public const string ProjectileName = "Projectile";
+        public const string TrajectoryName = "Trajectory";
 
         // Documented approximate coordinates.
         public static readonly GeoCoordinate MainzCoordinate = new GeoCoordinate(49.9929, 8.2473);
         public static readonly GeoCoordinate HelsinkiCoordinate = new GeoCoordinate(60.1699, 24.9384);
+
+        // ---- Centralized demonstration shot parameters (easy to locate and change) ----
+        public const double DemoHeadingDegrees = 20.0;
+        public const double DemoLaunchAngleDegrees = 45.0;
+        public const double DemoPower = 1.0;
+        public const double DemoMaximumRangeKm = 2000.0;
+
+        // ---- Trajectory visualization parameters ----
+        public const int TrajectorySampleCount = 48;
+        public const float TrajectoryArcHeight = PrototypeSceneReferences.EarthRadiusUnits * 0.35f;
+        public const float TrajectoryLineWidth = 0.08f;
+        public const float ProjectileDiameterFactor = 0.1f;
 
         [MenuItem("TerraToss/Build Prototype Scene")]
         public static void BuildPrototypeSceneMenu()
@@ -82,6 +97,9 @@ namespace TerraToss.Presentation.Editor
             GameObject target = BuildMarker(markers.transform, TargetName, HelsinkiCoordinate, radius,
                 new Color(0.15f, 0.75f, 0.30f));
 
+            // Static shot visualization (projectile + trajectory line).
+            GameObject shotVisualization = BuildShotVisualization(root.transform, radius);
+
             // Environment + directional light (reuse the existing one when present).
             GameObject environment = GetOrCreateChild(root.transform, EnvironmentName);
             environment.transform.localPosition = Vector3.zero;
@@ -94,6 +112,12 @@ namespace TerraToss.Presentation.Editor
             // Explicit references, so nothing needs a runtime scene search.
             var references = GetOrAddComponent<PrototypeSceneReferences>(root);
             references.SetReferences(earth.transform, origin.transform, target.transform, camera);
+
+            // Deterministic sibling order matching the documented hierarchy.
+            earth.transform.SetSiblingIndex(0);
+            markers.transform.SetSiblingIndex(1);
+            shotVisualization.transform.SetSiblingIndex(2);
+            environment.transform.SetSiblingIndex(3);
 
             return root;
         }
@@ -116,6 +140,58 @@ namespace TerraToss.Presentation.Editor
 
             ApplyMaterial(marker, name, color);
             return marker;
+        }
+
+        private static GameObject BuildShotVisualization(Transform rootTransform, float radius)
+        {
+            GameObject shotVisualization = GetOrCreateChild(rootTransform, ShotVisualizationName);
+            shotVisualization.transform.localPosition = Vector3.zero;
+            shotVisualization.transform.localRotation = Quaternion.identity;
+
+            // Deterministic demonstration shot: Mainz -> Helsinki. The impact is whatever
+            // GeoShotCalculator computes; it is not forced to be exactly Helsinki.
+            var input = new ShotInput(MainzCoordinate, DemoHeadingDegrees, DemoLaunchAngleDegrees,
+                DemoPower, DemoMaximumRangeKm, HelsinkiCoordinate);
+            ShotResult result = GeoShotCalculator.Calculate(input);
+
+            GeoCoordinate[] samples = ShotTrajectorySampler.Sample(input, result, TrajectorySampleCount);
+            Vector3[] visualPoints = TrajectoryArcProjection.ToVisualPoints(samples, radius, TrajectoryArcHeight);
+
+            // Projectile: a placeholder sphere resting on the origin (first trajectory point).
+            GameObject projectile = GetOrCreatePrimitive(shotVisualization.transform, ProjectileName, PrimitiveType.Sphere);
+            float projectileRadius = radius * ProjectileDiameterFactor * 0.5f;
+            projectile.transform.localScale = Vector3.one * (radius * ProjectileDiameterFactor);
+            projectile.transform.localRotation = Quaternion.identity;
+            projectile.transform.localPosition = visualPoints[0].normalized * (radius + projectileRadius);
+            ApplyMaterial(projectile, "Projectile", new Color(0.95f, 0.75f, 0.10f));
+
+            // Trajectory: a LineRenderer driven by the presentation-only view.
+            GameObject trajectory = GetOrCreateChild(shotVisualization.transform, TrajectoryName);
+            trajectory.transform.localPosition = Vector3.zero;
+            trajectory.transform.localRotation = Quaternion.identity;
+
+            LineRenderer line = GetOrAddComponent<LineRenderer>(trajectory);
+            ConfigureLineRenderer(line);
+            ApplyLineMaterial(line, "Trajectory", new Color(0.95f, 0.55f, 0.10f));
+
+            var view = GetOrAddComponent<ShotTrajectoryView>(trajectory);
+            view.SetLineRenderer(line);
+            view.SetTrajectory(visualPoints);
+
+            return shotVisualization;
+        }
+
+        private static void ConfigureLineRenderer(LineRenderer line)
+        {
+            // Positions are supplied in the LineRenderer's local space (see ShotTrajectoryView).
+            line.useWorldSpace = false;
+            line.widthMultiplier = TrajectoryLineWidth;
+            line.numCornerVertices = 2;
+            line.numCapVertices = 2;
+            line.alignment = LineAlignment.View;
+            line.textureMode = LineTextureMode.Stretch;
+            line.shadowCastingMode = UnityEngine.Rendering.ShadowCastingMode.Off;
+            line.receiveShadows = false;
         }
 
         private static Camera ConfigureCamera(Scene scene, Vector3 originPosition, Vector3 targetPosition, float radius)
@@ -229,7 +305,16 @@ namespace TerraToss.Presentation.Editor
 
         private static void ApplyMaterial(GameObject go, string materialName, Color color)
         {
-            var renderer = go.GetComponent<Renderer>();
+            ApplyMaterial(go.GetComponent<Renderer>(), materialName, color, "Universal Render Pipeline/Lit");
+        }
+
+        private static void ApplyLineMaterial(LineRenderer line, string materialName, Color color)
+        {
+            ApplyMaterial(line, materialName, color, "Universal Render Pipeline/Unlit");
+        }
+
+        private static void ApplyMaterial(Renderer renderer, string materialName, Color color, string preferredShader)
+        {
             if (renderer == null)
             {
                 return;
@@ -238,7 +323,11 @@ namespace TerraToss.Presentation.Editor
             Material material = renderer.sharedMaterial;
             if (material == null || material.name != materialName)
             {
-                Shader shader = Shader.Find("Universal Render Pipeline/Lit");
+                Shader shader = Shader.Find(preferredShader);
+                if (shader == null)
+                {
+                    shader = Shader.Find("Universal Render Pipeline/Lit");
+                }
                 if (shader == null)
                 {
                     shader = Shader.Find("Standard");
