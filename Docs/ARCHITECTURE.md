@@ -81,6 +81,10 @@ and `TerraToss.Geo`):
   arc vs. authoritative path" below.
 - `ShotTrajectoryView` (`MonoBehaviour`) draws a trajectory through a
   `LineRenderer` in local space; it owns no geographic rules.
+- `FlightPath` (pure) evaluates a deterministic position along the trajectory
+  polyline for a normalized progress, and `ShotFlightAnimator` (`MonoBehaviour`)
+  moves the projectile along it over a fixed duration (6–10 s), time-driven with
+  no physics. Neither owns geographic rules nor recomputes the impact/grade.
 - `PrototypeSceneReferences` holds explicit scene references (no runtime search).
 - `PrototypeSceneBuilder` (Editor assembly `TerraToss.Presentation.Editor`)
   builds the prototype hierarchy idempotently into `Bootstrap.unity`, including a

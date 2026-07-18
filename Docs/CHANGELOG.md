@@ -49,13 +49,22 @@
     (Projectile sphere on the origin + Trajectory LineRenderer) idempotently from
     a centralized deterministic demo shot (Mainz → Helsinki), and to keep a stable
     sibling order. `Bootstrap.unity` updated accordingly.
-- Edit Mode test suite: `TerraToss.Geo.EditMode.Tests` (119) and
-  `TerraToss.Presentation.EditMode.Tests` (28) — 147 tests total, all passing.
+- Projectile flight animation:
+  - `FlightPath` (pure, `TerraToss.Presentation`): deterministic position along a
+    trajectory polyline for a normalized, clamped progress.
+  - `ShotFlightAnimator` (`MonoBehaviour`): time-driven projectile movement along
+    the trajectory over a configurable 6–10 s duration (default 8 s), no physics,
+    `playOnStart` entry point; owns no geographic rules.
+  - `PrototypeSceneBuilder` now adds and configures a single `ShotFlightAnimator`
+    on `ShotVisualization` idempotently; entering Play Mode flies the projectile.
+- Tests: Edit Mode `TerraToss.Geo.EditMode.Tests` (119) and
+  `TerraToss.Presentation.EditMode.Tests` (41) — 160 total; new Play Mode
+  assembly `TerraToss.Presentation.PlayMode.Tests` (3, flight flow). All passing.
 
 ### Not implemented
 
-- Projectile flight animation / movement along the trajectory.
-- Desktop input controls.
+- Desktop aiming controls (heading/angle/power) and firing.
+- User interface.
 - Gameplay orchestration and match rules.
 - Sensors.
 - Backend.

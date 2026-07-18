@@ -49,6 +49,9 @@ namespace TerraToss.Presentation.Tests.EditMode
                 Assert.AreEqual(1, trajectory.GetComponents<ShotTrajectoryView>().Length,
                     "Trajectory must have exactly one ShotTrajectoryView.");
                 Assert.That(trajectory.GetComponent<LineRenderer>().positionCount, Is.GreaterThan(1));
+
+                Assert.AreEqual(1, shotVisualization.GetComponents<ShotFlightAnimator>().Length,
+                    "ShotVisualization must have exactly one ShotFlightAnimator.");
             }
             finally
             {

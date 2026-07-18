@@ -43,6 +43,9 @@ namespace TerraToss.Presentation.Editor
         public const float TrajectoryLineWidth = 0.08f;
         public const float ProjectileDiameterFactor = 0.1f;
 
+        // ---- Flight animation parameters (compressed to the 6-10 s design window) ----
+        public const float DemoFlightDurationSeconds = 8f;
+
         [MenuItem("TerraToss/Build Prototype Scene")]
         public static void BuildPrototypeSceneMenu()
         {
@@ -177,6 +180,10 @@ namespace TerraToss.Presentation.Editor
             var view = GetOrAddComponent<ShotTrajectoryView>(trajectory);
             view.SetLineRenderer(line);
             view.SetTrajectory(visualPoints);
+
+            // Flight animator: plays on Play Mode entry, moving the projectile along the trajectory.
+            var animator = GetOrAddComponent<ShotFlightAnimator>(shotVisualization);
+            animator.Configure(projectile.transform, visualPoints, DemoFlightDurationSeconds, playOnStart: true);
 
             return shotVisualization;
         }

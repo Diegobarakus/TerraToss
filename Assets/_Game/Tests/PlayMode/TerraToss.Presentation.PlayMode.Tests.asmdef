@@ -1,0 +1,23 @@
+{
+    "name": "TerraToss.Presentation.PlayMode.Tests",
+    "rootNamespace": "TerraToss.Presentation.Tests.PlayMode",
+    "references": [
+        "TerraToss.Presentation",
+        "TerraToss.Geo",
+        "UnityEngine.TestRunner",
+        "UnityEditor.TestRunner"
+    ],
+    "includePlatforms": [],
+    "excludePlatforms": [],
+    "allowUnsafeCode": false,
+    "overrideReferences": true,
+    "precompiledReferences": [
+        "nunit.framework.dll"
+    ],
+    "autoReferenced": false,
+    "defineConstraints": [
+        "UNITY_INCLUDE_TESTS"
+    ],
+    "versionDefines": [],
+    "noEngineReferences": false
+}
