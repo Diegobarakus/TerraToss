@@ -1,0 +1,39 @@
+{
+  "$schema": "https://json.schemastore.org/claude-code-settings.json",
+  "autoMemoryEnabled": true,
+  "permissions": {
+    "defaultMode": "default",
+    "ask": [
+      "Bash(git commit *)",
+      "Bash(git push *)",
+      "Bash(git tag *)",
+      "Bash(dotnet add package *)",
+      "Bash(pip install *)",
+      "Bash(npm install *)"
+    ],
+    "deny": [
+      "Read(./Library/**)",
+      "Read(./Temp/**)",
+      "Read(./Obj/**)",
+      "Read(./Logs/**)",
+      "Read(./Build/**)",
+      "Read(./Builds/**)",
+      "Read(./.utmp/**)",
+      "Read(./UserSettings/**)",
+      "Edit(./Library/**)",
+      "Edit(./Temp/**)",
+      "Edit(./Obj/**)",
+      "Edit(./Logs/**)",
+      "Edit(./Build/**)",
+      "Edit(./Builds/**)",
+      "Edit(./.utmp/**)",
+      "Edit(./UserSettings/**)",
+      "Read(./.env)",
+      "Read(./.env.*)",
+      "Read(./secrets/**)",
+      "Bash(git reset --hard *)",
+      "Bash(git clean -fd*)",
+      "Bash(git push --force*)"
+    ]
+  }
+}
