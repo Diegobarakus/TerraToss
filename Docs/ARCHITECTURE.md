@@ -85,6 +85,15 @@ and `TerraToss.Geo`):
   polyline for a normalized progress, and `ShotFlightAnimator` (`MonoBehaviour`)
   moves the projectile along it over a fixed duration (6–10 s), time-driven with
   no physics. Neither owns geographic rules nor recomputes the impact/grade.
+- `ShotVisualizationDirector` (`MonoBehaviour`) is the single place that turns an
+  aim into a shot: it calls `GeoShotCalculator`, `ShotTrajectorySampler`, and
+  `TrajectoryArcProjection`, then updates the trajectory view, projectile, and
+  flight. It exposes `Fire(heading, angle, power)` and the last `ShotResult` but
+  adds no geographic rules of its own.
+- `ShotAimController` (`MonoBehaviour`) reads desktop keyboard input through the
+  Input System (polling `Keyboard.current`) to adjust heading/angle/power and to
+  fire, and `ShotAimReadout` (`MonoBehaviour`) shows a minimal IMGUI readout.
+  Input and UI stay in these components; they never compute authoritative results.
 - `PrototypeSceneReferences` holds explicit scene references (no runtime search).
 - `PrototypeSceneBuilder` (Editor assembly `TerraToss.Presentation.Editor`)
   builds the prototype hierarchy idempotently into `Bootstrap.unity`, including a

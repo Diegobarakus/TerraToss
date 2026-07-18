@@ -2,7 +2,8 @@
     "name": "TerraToss.Presentation",
     "rootNamespace": "TerraToss.Presentation",
     "references": [
-        "TerraToss.Geo"
+        "TerraToss.Geo",
+        "Unity.InputSystem"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],

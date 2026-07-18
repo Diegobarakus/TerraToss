@@ -52,6 +52,12 @@ namespace TerraToss.Presentation.Tests.EditMode
 
                 Assert.AreEqual(1, shotVisualization.GetComponents<ShotFlightAnimator>().Length,
                     "ShotVisualization must have exactly one ShotFlightAnimator.");
+                Assert.AreEqual(1, shotVisualization.GetComponents<ShotVisualizationDirector>().Length,
+                    "ShotVisualization must have exactly one ShotVisualizationDirector.");
+                Assert.AreEqual(1, shotVisualization.GetComponents<ShotAimController>().Length,
+                    "ShotVisualization must have exactly one ShotAimController.");
+                Assert.AreEqual(1, shotVisualization.GetComponents<ShotAimReadout>().Length,
+                    "ShotVisualization must have exactly one ShotAimReadout.");
             }
             finally
             {

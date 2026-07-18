@@ -57,14 +57,24 @@
     `playOnStart` entry point; owns no geographic rules.
   - `PrototypeSceneBuilder` now adds and configures a single `ShotFlightAnimator`
     on `ShotVisualization` idempotently; entering Play Mode flies the projectile.
+- Desktop aiming and interactive fire:
+  - `ShotVisualizationDirector` (`MonoBehaviour`): orchestrates a shot by reusing
+    the existing pure calculators; `Fire(heading, angle, power)` and `LastResult`.
+  - `ShotAimController` (`MonoBehaviour`): keyboard aiming via the Input System
+    (polling, no Input Action assets) — A/D heading, W/S angle, Q/E power, Space
+    to fire.
+  - `ShotAimReadout` (`MonoBehaviour`): minimal IMGUI readout of aim and result.
+  - `PrototypeSceneBuilder` refactored to wire the director/controller/readout on
+    `ShotVisualization` idempotently and delegate the demo shot to the director;
+    `TerraToss.Presentation` now references `Unity.InputSystem`.
 - Tests: Edit Mode `TerraToss.Geo.EditMode.Tests` (119) and
-  `TerraToss.Presentation.EditMode.Tests` (41) — 160 total; new Play Mode
-  assembly `TerraToss.Presentation.PlayMode.Tests` (3, flight flow). All passing.
+  `TerraToss.Presentation.EditMode.Tests` (41) — 160 total; Play Mode
+  `TerraToss.Presentation.PlayMode.Tests` (6, flight + director/controller fire).
+  All passing.
 
 ### Not implemented
 
-- Desktop aiming controls (heading/angle/power) and firing.
-- User interface.
-- Gameplay orchestration and match rules.
+- Match rules and scoring / gameplay orchestration.
+- Formal user interface (beyond the debug IMGUI readout).
 - Sensors.
 - Backend.

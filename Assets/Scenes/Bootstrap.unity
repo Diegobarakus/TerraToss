@@ -1032,7 +1032,7 @@ Transform:
   m_GameObject: {fileID: 1111302094}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0.48414934, y: 4.021315, z: 3.340228}
+  m_LocalPosition: {x: 0.46109462, y: 3.829824, z: 3.1811695}
   m_LocalScale: {x: 0.5, y: 0.5, z: 0.5}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1487,6 +1487,9 @@ GameObject:
   m_Component:
   - component: {fileID: 1460631465}
   - component: {fileID: 1460631466}
+  - component: {fileID: 1460631469}
+  - component: {fileID: 1460631468}
+  - component: {fileID: 1460631467}
   m_Layer: 0
   m_Name: ShotVisualization
   m_TagString: Untagged
@@ -1574,7 +1577,64 @@ MonoBehaviour:
   - {x: 0.8138043, y: 4.670685, z: 1.9248272}
   - {x: 0.8017529, y: 4.575382, z: 1.8501534}
   flightDurationSeconds: 8
-  playOnStart: 1
+  playOnStart: 0
+--- !u!114 &1460631467
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1460631464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 845c0ec069d2d5347858eb5e701c87fd, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TerraToss.Presentation::TerraToss.Presentation.ShotAimReadout
+  aimController: {fileID: 1460631468}
+  director: {fileID: 1460631469}
+--- !u!114 &1460631468
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1460631464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f11a0ed6a8e3c9d42a5162ff1314bd08, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TerraToss.Presentation::TerraToss.Presentation.ShotAimController
+  director: {fileID: 1460631469}
+  headingDegrees: 20
+  launchAngleDegrees: 45
+  power: 1
+  headingStepPerSecond: 45
+  angleStepPerSecond: 30
+  powerStepPerSecond: 0.5
+--- !u!114 &1460631469
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1460631464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1b4916419b54b3e479a64ef483ba97ed, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: TerraToss.Presentation::TerraToss.Presentation.ShotVisualizationDirector
+  trajectoryView: {fileID: 1452778522}
+  flightAnimator: {fileID: 1460631466}
+  projectile: {fileID: 1111302095}
+  originLatitude: 49.9929
+  originLongitude: 8.247299999999996
+  targetLatitude: 60.1699
+  targetLongitude: 24.9384
+  maximumRangeKm: 2000
+  earthRadius: 5
+  arcHeight: 1.75
+  sampleCount: 48
+  flightDurationSeconds: 8
 --- !u!21 &1791534065
 Material:
   serializedVersion: 8

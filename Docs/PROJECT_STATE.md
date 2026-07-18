@@ -67,20 +67,31 @@ Last initialized: 2026-07-18
     interpolation; no time or state.
   - `ShotFlightAnimator` (`MonoBehaviour`): moves the projectile along the
     trajectory points over a configurable duration (`[Range(6,10)]` s, default 8),
-    time-driven with no physics; `Play`, `IsPlaying`, `Progress`; `playOnStart`
-    triggers it on Play Mode entry. Owns no geographic rules and does not recompute
-    impact or grade.
+    time-driven with no physics; `Play`, `IsPlaying`, `Progress`. Owns no
+    geographic rules and does not recompute impact or grade.
+- Desktop aiming and interactive fire:
+  - `ShotVisualizationDirector` (`MonoBehaviour`): orchestrates a shot by reusing
+    `GeoShotCalculator` + `ShotTrajectorySampler` + `TrajectoryArcProjection`,
+    updating the trajectory, projectile, and flight from an aim; exposes
+    `Fire(heading, angle, power)` and `LastResult`. No new geographic rules.
+  - `ShotAimController` (`MonoBehaviour`): desktop keyboard aiming via the Input
+    System (polling `Keyboard.current`, no Input Action assets). A/D heading,
+    W/S angle (clamped 0–90), Q/E power (clamped 0–1), Space to fire.
+  - `ShotAimReadout` (`MonoBehaviour`): minimal IMGUI (`OnGUI`) readout of the
+    current aim and the last impact grade / distance.
 - Bootstrap.unity prototype hierarchy: `TerraToss_Prototype` (Earth sphere;
   Markers → Origin_Mainz, Target_Helsinki; ShotVisualization → Projectile,
-  Trajectory, with a `ShotFlightAnimator`; Environment → Directional Light) plus
-  the reused Main Camera and Global Volume. `PrototypeSceneBuilder` builds a
-  deterministic demo shot (Mainz → Helsinki, centralized parameters), its
-  trajectory, and the flight animator idempotently. Entering Play Mode flies the
-  projectile along the trajectory over 8 seconds.
+  Trajectory, with `ShotFlightAnimator`, `ShotVisualizationDirector`,
+  `ShotAimController`, `ShotAimReadout`; Environment → Directional Light) plus the
+  reused Main Camera and Global Volume. `PrototypeSceneBuilder` idempotently wires
+  the shot pipeline and populates an initial static trajectory (Mainz → Helsinki,
+  centralized parameters). In Play Mode the player aims with the keyboard and
+  presses Space to recompute and fly the shot.
 - Tests: Edit Mode `TerraToss.Geo.EditMode.Tests` (119) and
   `TerraToss.Presentation.EditMode.Tests` (41) — 160 total; Play Mode
-  `TerraToss.Presentation.PlayMode.Tests` (3, flight flow). All passing.
-- No desktop controls, UI, animated camera, or gameplay orchestration yet.
+  `TerraToss.Presentation.PlayMode.Tests` (6, flight + director/controller fire).
+  All passing.
+- No match rules, gameplay orchestration, animated camera, or formal UI yet.
 
 ## Current phase
 
@@ -88,21 +99,18 @@ Phase 1: local functional prototype.
 
 ## Next recommended task
 
-The projectile flight animation is complete. The next step is desktop aiming
-controls that drive the demo shot instead of hardcoded parameters:
+Desktop aiming and interactive fire are complete. Candidate next steps (pick one
+and scope it):
 
-1. A presentation/input component that lets the user set heading, launch angle,
-   and power on desktop (keyboard/mouse via the Input System), feeding a
-   `ShotInput`.
-2. Recompute the `ShotResult`, trajectory, and flight on demand (fire action),
-   reusing `GeoShotCalculator`, `ShotTrajectorySampler`, `TrajectoryArcProjection`,
-   and `ShotFlightAnimator` — no new geographic rules.
-3. Minimal on-screen readout of heading/angle/power and the impact grade (a later
-   UI task may formalize this).
-4. Play Mode test(s) for the aim → fire → flight flow where practical.
+1. Match rules / scoring: a pure C# layer that tracks shots and evaluates a
+   simple win condition (e.g. Camp mode: one valid hit destroys the target),
+   with Edit Mode tests.
+2. Camera framing improvements: keep both origin and impact in view after firing
+   (still no animated/Cinemachine camera).
+3. A first pass at a proper uGUI HUD to replace the IMGUI readout.
 
-Continue reproducing scene changes through the idempotent Editor builder; never
-hand-edit `Bootstrap.unity` YAML.
+Prefer the pure/testable layer (1) first. Continue reproducing scene changes
+through the idempotent Editor builder; never hand-edit `Bootstrap.unity` YAML.
 
 ## Known local issue
 

@@ -151,21 +151,10 @@ namespace TerraToss.Presentation.Editor
             shotVisualization.transform.localPosition = Vector3.zero;
             shotVisualization.transform.localRotation = Quaternion.identity;
 
-            // Deterministic demonstration shot: Mainz -> Helsinki. The impact is whatever
-            // GeoShotCalculator computes; it is not forced to be exactly Helsinki.
-            var input = new ShotInput(MainzCoordinate, DemoHeadingDegrees, DemoLaunchAngleDegrees,
-                DemoPower, DemoMaximumRangeKm, HelsinkiCoordinate);
-            ShotResult result = GeoShotCalculator.Calculate(input);
-
-            GeoCoordinate[] samples = ShotTrajectorySampler.Sample(input, result, TrajectorySampleCount);
-            Vector3[] visualPoints = TrajectoryArcProjection.ToVisualPoints(samples, radius, TrajectoryArcHeight);
-
-            // Projectile: a placeholder sphere resting on the origin (first trajectory point).
+            // Projectile placeholder sphere; its position is set by the director when a shot is fired.
             GameObject projectile = GetOrCreatePrimitive(shotVisualization.transform, ProjectileName, PrimitiveType.Sphere);
-            float projectileRadius = radius * ProjectileDiameterFactor * 0.5f;
             projectile.transform.localScale = Vector3.one * (radius * ProjectileDiameterFactor);
             projectile.transform.localRotation = Quaternion.identity;
-            projectile.transform.localPosition = visualPoints[0].normalized * (radius + projectileRadius);
             ApplyMaterial(projectile, "Projectile", new Color(0.95f, 0.75f, 0.10f));
 
             // Trajectory: a LineRenderer driven by the presentation-only view.
@@ -179,11 +168,24 @@ namespace TerraToss.Presentation.Editor
 
             var view = GetOrAddComponent<ShotTrajectoryView>(trajectory);
             view.SetLineRenderer(line);
-            view.SetTrajectory(visualPoints);
 
-            // Flight animator: plays on Play Mode entry, moving the projectile along the trajectory.
             var animator = GetOrAddComponent<ShotFlightAnimator>(shotVisualization);
-            animator.Configure(projectile.transform, visualPoints, DemoFlightDurationSeconds, playOnStart: true);
+
+            // Director orchestrates a shot: compute -> sample -> project -> view + projectile + flight.
+            var director = GetOrAddComponent<ShotVisualizationDirector>(shotVisualization);
+            director.Configure(view, animator, projectile.transform,
+                MainzCoordinate, HelsinkiCoordinate, DemoMaximumRangeKm,
+                radius, TrajectoryArcHeight, TrajectorySampleCount, DemoFlightDurationSeconds);
+
+            // Desktop aiming controls + minimal on-screen readout (fire with Space in Play Mode).
+            var aim = GetOrAddComponent<ShotAimController>(shotVisualization);
+            aim.Configure(director, DemoHeadingDegrees, DemoLaunchAngleDegrees, DemoPower);
+
+            var readout = GetOrAddComponent<ShotAimReadout>(shotVisualization);
+            readout.Configure(aim, director);
+
+            // Populate the initial static trajectory (without playing the flight).
+            director.Fire(DemoHeadingDegrees, DemoLaunchAngleDegrees, DemoPower, play: false);
 
             return shotVisualization;
         }
