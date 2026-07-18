@@ -46,6 +46,10 @@ namespace TerraToss.Presentation.Editor
         // ---- Flight animation parameters (compressed to the 6-10 s design window) ----
         public const float DemoFlightDurationSeconds = 8f;
 
+        // ---- Camp-mode match parameters ----
+        public const ImpactGrade DemoCampHitThreshold = ImpactGrade.StrongHit;
+        public const int DemoCampMaxShots = 0;
+
         [MenuItem("TerraToss/Build Prototype Scene")]
         public static void BuildPrototypeSceneMenu()
         {
@@ -175,7 +179,8 @@ namespace TerraToss.Presentation.Editor
             var director = GetOrAddComponent<ShotVisualizationDirector>(shotVisualization);
             director.Configure(view, animator, projectile.transform,
                 MainzCoordinate, HelsinkiCoordinate, DemoMaximumRangeKm,
-                radius, TrajectoryArcHeight, TrajectorySampleCount, DemoFlightDurationSeconds);
+                radius, TrajectoryArcHeight, TrajectorySampleCount, DemoFlightDurationSeconds,
+                DemoCampHitThreshold, DemoCampMaxShots);
 
             // Desktop aiming controls + minimal on-screen readout (fire with Space in Play Mode).
             var aim = GetOrAddComponent<ShotAimController>(shotVisualization);
@@ -184,8 +189,8 @@ namespace TerraToss.Presentation.Editor
             var readout = GetOrAddComponent<ShotAimReadout>(shotVisualization);
             readout.Configure(aim, director);
 
-            // Populate the initial static trajectory (without playing the flight).
-            director.Fire(DemoHeadingDegrees, DemoLaunchAngleDegrees, DemoPower, play: false);
+            // Populate the initial static trajectory (without playing the flight or counting a shot).
+            director.Fire(DemoHeadingDegrees, DemoLaunchAngleDegrees, DemoPower, play: false, countShot: false);
 
             return shotVisualization;
         }

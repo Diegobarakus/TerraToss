@@ -78,7 +78,15 @@ Last initialized: 2026-07-18
     System (polling `Keyboard.current`, no Input Action assets). A/D heading,
     W/S angle (clamped 0–90), Q/E power (clamped 0–1), Space to fire.
   - `ShotAimReadout` (`MonoBehaviour`): minimal IMGUI (`OnGUI`) readout of the
-    current aim and the last impact grade / distance.
+    current aim, the last impact grade / distance, and the match status.
+- Camp-mode match rules (`TerraToss.Gameplay` assembly, pure C#,
+  `noEngineReferences`, depends on `TerraToss.Geo`):
+  - `MatchStatus` (enum: InProgress / Won / Lost) and `CampMatch`: a single valid
+    hit (grade at least as good as a configurable threshold) destroys the camp;
+    optional shot limit can cause a loss. Deterministic; resolves once.
+  - `ShotVisualizationDirector` tracks a `CampMatch` (default threshold
+    StrongHit, unlimited shots), counting only real fires; exposes `MatchStatus`
+    and `ShotsTaken`, shown in the readout.
 - Bootstrap.unity prototype hierarchy: `TerraToss_Prototype` (Earth sphere;
   Markers → Origin_Mainz, Target_Helsinki; ShotVisualization → Projectile,
   Trajectory, with `ShotFlightAnimator`, `ShotVisualizationDirector`,
@@ -87,11 +95,12 @@ Last initialized: 2026-07-18
   the shot pipeline and populates an initial static trajectory (Mainz → Helsinki,
   centralized parameters). In Play Mode the player aims with the keyboard and
   presses Space to recompute and fly the shot.
-- Tests: Edit Mode `TerraToss.Geo.EditMode.Tests` (119) and
-  `TerraToss.Presentation.EditMode.Tests` (41) — 160 total; Play Mode
-  `TerraToss.Presentation.PlayMode.Tests` (6, flight + director/controller fire).
+- Tests: Edit Mode `TerraToss.Geo.EditMode.Tests` (119),
+  `TerraToss.Presentation.EditMode.Tests` (41), and
+  `TerraToss.Gameplay.EditMode.Tests` (17) — 177 total; Play Mode
+  `TerraToss.Presentation.PlayMode.Tests` (7, flight + fire + match tracking).
   All passing.
-- No match rules, gameplay orchestration, animated camera, or formal UI yet.
+- Only Camp mode exists; no multi-sector modes, animated camera, or formal UI yet.
 
 ## Current phase
 
@@ -99,18 +108,19 @@ Phase 1: local functional prototype.
 
 ## Next recommended task
 
-Desktop aiming and interactive fire are complete. Candidate next steps (pick one
-and scope it):
+Camp-mode match rules are complete. Candidate next steps (pick one and scope it):
 
-1. Match rules / scoring: a pure C# layer that tracks shots and evaluates a
-   simple win condition (e.g. Camp mode: one valid hit destroys the target),
-   with Edit Mode tests.
-2. Camera framing improvements: keep both origin and impact in view after firing
-   (still no animated/Cinemachine camera).
+1. Match feedback: reflect a Won/Lost outcome in the scene (e.g. change the
+   target marker's material/state when the camp is destroyed) and add a restart,
+   still driven by the idempotent builder.
+2. Camera framing: keep both origin and impact in view after firing (still no
+   animated/Cinemachine camera).
 3. A first pass at a proper uGUI HUD to replace the IMGUI readout.
+4. A second match mode from `GAME_DESIGN.md` (City mode: five sectors) as a pure
+   layer with Edit Mode tests.
 
-Prefer the pure/testable layer (1) first. Continue reproducing scene changes
-through the idempotent Editor builder; never hand-edit `Bootstrap.unity` YAML.
+Prefer pure/testable layers first. Continue reproducing scene changes through the
+idempotent Editor builder; never hand-edit `Bootstrap.unity` YAML.
 
 ## Known local issue
 

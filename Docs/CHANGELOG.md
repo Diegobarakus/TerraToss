@@ -67,14 +67,24 @@
   - `PrototypeSceneBuilder` refactored to wire the director/controller/readout on
     `ShotVisualization` idempotently and delegate the demo shot to the director;
     `TerraToss.Presentation` now references `Unity.InputSystem`.
-- Tests: Edit Mode `TerraToss.Geo.EditMode.Tests` (119) and
-  `TerraToss.Presentation.EditMode.Tests` (41) — 160 total; Play Mode
-  `TerraToss.Presentation.PlayMode.Tests` (6, flight + director/controller fire).
+- Camp-mode match rules (`TerraToss.Gameplay` assembly, pure C#):
+  - `MatchStatus` (InProgress / Won / Lost) and `CampMatch`: one valid hit
+    (grade at least as good as a configurable threshold, default StrongHit)
+    destroys the camp; an optional shot limit can cause a loss. Deterministic.
+  - `ShotVisualizationDirector` now tracks a `CampMatch`, counting only real
+    fires (the builder's static populate does not count), and exposes
+    `MatchStatus` / `ShotsTaken`; `ShotAimReadout` shows them. `TerraToss.Presentation`
+    now references `TerraToss.Gameplay`.
+- Tests: Edit Mode `TerraToss.Geo.EditMode.Tests` (119),
+  `TerraToss.Presentation.EditMode.Tests` (41), and new
+  `TerraToss.Gameplay.EditMode.Tests` (17) — 177 total; Play Mode
+  `TerraToss.Presentation.PlayMode.Tests` (7, flight + fire + match tracking).
   All passing.
 
 ### Not implemented
 
-- Match rules and scoring / gameplay orchestration.
+- Match feedback in the scene (win/lose state) and restart.
+- Additional match modes (City, Country).
 - Formal user interface (beyond the debug IMGUI readout).
 - Sensors.
 - Backend.

@@ -129,6 +129,16 @@ z = R * cos(lat) * cos(lon)
 - East (lon > 0) is toward +X (right); West (lon < 0) toward −X (left).
 - The magnitude of the result is exactly R.
 
+### Match rules
+
+Match rules are pure C# domain logic in the `TerraToss.Gameplay` assembly
+(`noEngineReferences`, depends on `TerraToss.Geo`). `CampMatch` implements Camp
+mode: a single valid hit (impact grade at least as good as a configurable
+threshold) wins; an optional shot limit can cause a loss. It only inspects each
+shot's `ImpactGrade` and computes no geographic result. Presentation
+(`ShotVisualizationDirector`) owns a `CampMatch` instance and feeds real shots to
+it, but never reimplements the rules.
+
 ### Platform services
 
 Future interfaces:

@@ -42,7 +42,12 @@ namespace TerraToss.Presentation
                 text.AppendLine($"Distance to target: {result.DistanceToTargetKm:0.0} km");
             }
 
-            GUI.Label(new Rect(12f, 12f, 440f, 170f), text.ToString(), style);
+            if (director != null)
+            {
+                text.AppendLine($"Camp: {director.MatchStatus}   Shots: {director.ShotsTaken}");
+            }
+
+            GUI.Label(new Rect(12f, 12f, 460f, 200f), text.ToString(), style);
         }
     }
 }

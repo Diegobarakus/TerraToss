@@ -1,5 +1,6 @@
 using System.Collections;
 using NUnit.Framework;
+using TerraToss.Gameplay;
 using TerraToss.Geo;
 using TerraToss.Presentation;
 using UnityEngine;
@@ -29,7 +30,8 @@ namespace TerraToss.Presentation.Tests.PlayMode
 
             animator = host.AddComponent<ShotFlightAnimator>();
             var director = host.AddComponent<ShotVisualizationDirector>();
-            director.Configure(view, animator, projectile, Mainz, Helsinki, 2000.0, 5.0, 1.75, SampleCount, 0.2f);
+            director.Configure(view, animator, projectile, Mainz, Helsinki, 2000.0, 5.0, 1.75, SampleCount, 0.2f,
+                ImpactGrade.StrongHit, 0);
             return director;
         }
 
@@ -83,6 +85,24 @@ namespace TerraToss.Presentation.Tests.PlayMode
             controller.Fire();
 
             Assert.IsTrue(director.HasResult);
+            yield return null;
+            Object.Destroy(host);
+        }
+
+        [UnityTest]
+        public IEnumerator Fire_CountsShotAndTracksMatch()
+        {
+            ShotVisualizationDirector director = BuildRig(out LineRenderer _, out Transform _,
+                out ShotFlightAnimator _, out GameObject host);
+
+            ShotResult result = director.Fire(20.0, 45.0, 1.0, play: false);
+
+            Assert.AreEqual(1, director.ShotsTaken);
+            MatchStatus expected = CampMatch.IsValidHit(result.Grade, ImpactGrade.StrongHit)
+                ? MatchStatus.Won
+                : MatchStatus.InProgress;
+            Assert.AreEqual(expected, director.MatchStatus);
+
             yield return null;
             Object.Destroy(host);
         }

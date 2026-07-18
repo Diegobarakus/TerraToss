@@ -1,3 +1,4 @@
+using TerraToss.Gameplay;
 using TerraToss.Geo;
 using UnityEngine;
 
@@ -31,8 +32,13 @@ namespace TerraToss.Presentation
         [SerializeField] private int sampleCount = 48;
         [SerializeField] private float flightDurationSeconds = 8f;
 
+        [Header("Match (Camp mode)")]
+        [SerializeField] private ImpactGrade campHitThreshold = ImpactGrade.StrongHit;
+        [SerializeField] private int campMaxShots = 0;
+
         private bool hasResult;
         private ShotResult lastResult;
+        private CampMatch match;
 
         /// <summary>True once a shot has been fired at least once.</summary>
         public bool HasResult => hasResult;
@@ -40,11 +46,18 @@ namespace TerraToss.Presentation
         /// <summary>The most recently computed shot result.</summary>
         public ShotResult LastResult => lastResult;
 
+        /// <summary>Current Camp-mode match status.</summary>
+        public MatchStatus MatchStatus => match != null ? match.Status : MatchStatus.InProgress;
+
+        /// <summary>Number of shots counted towards the current match.</summary>
+        public int ShotsTaken => match != null ? match.ShotsTaken : 0;
+
         /// <summary>Assigns references and parameters. Intended for the Editor builder and tests.</summary>
         public void Configure(
             ShotTrajectoryView trajectoryView, ShotFlightAnimator flightAnimator, Transform projectile,
             GeoCoordinate origin, GeoCoordinate target, double maximumRangeKm,
-            double earthRadius, double arcHeight, int sampleCount, float flightDurationSeconds)
+            double earthRadius, double arcHeight, int sampleCount, float flightDurationSeconds,
+            ImpactGrade campHitThreshold, int campMaxShots)
         {
             this.trajectoryView = trajectoryView;
             this.flightAnimator = flightAnimator;
@@ -58,13 +71,17 @@ namespace TerraToss.Presentation
             this.arcHeight = arcHeight;
             this.sampleCount = sampleCount;
             this.flightDurationSeconds = flightDurationSeconds;
+            this.campHitThreshold = campHitThreshold;
+            this.campMaxShots = campMaxShots;
+            this.match = null; // start a fresh match with the new configuration
         }
 
         /// <summary>
         /// Recomputes the shot for the given aim and updates the trajectory, projectile, and flight.
         /// The flight is started unless <paramref name="play"/> is false. Returns the computed result.
         /// </summary>
-        public ShotResult Fire(double headingDegrees, double launchAngleDegrees, double power, bool play = true)
+        public ShotResult Fire(double headingDegrees, double launchAngleDegrees, double power,
+            bool play = true, bool countShot = true)
         {
             var origin = new GeoCoordinate(originLatitude, originLongitude);
             var target = new GeoCoordinate(targetLatitude, targetLongitude);
@@ -96,6 +113,13 @@ namespace TerraToss.Presentation
 
             lastResult = result;
             hasResult = true;
+
+            if (countShot)
+            {
+                match ??= new CampMatch(campHitThreshold, campMaxShots);
+                match.RegisterShot(result);
+            }
+
             return result;
         }
     }

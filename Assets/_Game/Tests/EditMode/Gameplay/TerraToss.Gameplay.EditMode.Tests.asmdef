@@ -1,14 +1,15 @@
 {
-    "name": "TerraToss.Presentation.PlayMode.Tests",
-    "rootNamespace": "TerraToss.Presentation.Tests.PlayMode",
+    "name": "TerraToss.Gameplay.EditMode.Tests",
+    "rootNamespace": "TerraToss.Gameplay.Tests.EditMode",
     "references": [
-        "TerraToss.Presentation",
-        "TerraToss.Geo",
         "TerraToss.Gameplay",
+        "TerraToss.Geo",
         "UnityEngine.TestRunner",
         "UnityEditor.TestRunner"
     ],
-    "includePlatforms": [],
+    "includePlatforms": [
+        "Editor"
+    ],
     "excludePlatforms": [],
     "allowUnsafeCode": false,
     "overrideReferences": true,

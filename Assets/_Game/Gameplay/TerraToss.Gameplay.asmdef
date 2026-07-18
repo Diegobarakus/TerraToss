@@ -1,10 +1,8 @@
 {
-    "name": "TerraToss.Presentation",
-    "rootNamespace": "TerraToss.Presentation",
+    "name": "TerraToss.Gameplay",
+    "rootNamespace": "TerraToss.Gameplay",
     "references": [
-        "TerraToss.Geo",
-        "TerraToss.Gameplay",
-        "Unity.InputSystem"
+        "TerraToss.Geo"
     ],
     "includePlatforms": [],
     "excludePlatforms": [],
@@ -14,5 +12,5 @@
     "autoReferenced": true,
     "defineConstraints": [],
     "versionDefines": [],
-    "noEngineReferences": false
+    "noEngineReferences": true
 }

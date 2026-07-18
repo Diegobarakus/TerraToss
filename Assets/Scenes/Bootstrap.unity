@@ -1635,6 +1635,8 @@ MonoBehaviour:
   arcHeight: 1.75
   sampleCount: 48
   flightDurationSeconds: 8
+  campHitThreshold: 1
+  campMaxShots: 0
 --- !u!21 &1791534065
 Material:
   serializedVersion: 8
